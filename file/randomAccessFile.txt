@@ -1,0 +1,4 @@
+randomAccessFile
+	long getFilePoint():记录文件指针的当前位置。
+	void seek(long pos):将文件记录指针定位到pos位置。
+	skipBytes(int n):使指针跳过n个字节-->seek(newpos);

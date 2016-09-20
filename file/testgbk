@@ -1,0 +1,135 @@
+大型互联网应用的技术要求是高并发、高可用、高性能、大容量，这就要求系统具有很好的可伸缩性。通过采用计算速度更快的CPU、更大的内存、配置更好更贵的机器来支撑系统的可伸缩性不是一个很好的办法，单台机器性能终归有限，而且高端机器价格不菲，这就是所谓的Scale up。
+
+另一种方式就是采用多台普通机器，将它们有效集群起来，让每台机器参与贡献一小部分力量，那么整体的处理能力和性能往往轻松超过昂贵的大型机。并且这种集群方式理论上是无上限的，可以根据需要水平方向任意加减机器，系统的可伸缩性得到很好保证，这就是所谓的Scale out。
+
+Scale out是大型互联网应用架构的基本准则，前面介绍的Redis sharding技术，就是典型的Scale out。通过集群多个Redis实例，来完成单Redis实例无法完成的大规模处理需求。那么在逻辑应用层面，我们如何设计从而保证这种Scale out呢？
+
+大家知道，虽然Http是无状态的，但web应用通常是有状态的，前面介绍的SSO也大量地谈到了这一问题。这种有状态，其实就是浏览器客户端和应用服务端维持的一种会话，这种会话，基本的实现方式就是会话标识保存在浏览器Cookie中，对Java web应用来说，就是这个缺省名叫jsessionid的cookie。会话本身保存在服务端，一般Java应用服务器提供这项基础服务，即Session服务。
+
+应用服务器的Session是基于JVM内存实现的，这就带来了一个问题：运行在其上的web应用有状态会话，也是基于JVM内存的。那么，当规模上来，需要部署多个点，即多台机器部署同样应用共同分担压力时，这种有状态web应用支持么？即支持Scale out么？
+
+只能这么说，有条件地支持！
+
+应用状态保存在本应用节点上，当后续同一会话的Http请求到来时，它必须落在同样的应用节点上，落到其它应用节点上，由于访问不到这个JVM中的会话，状态丢失。
+
+这就要求，来自浏览器客户端的请求，一旦访问了某个应用节点，它的后续访问也必须同样是这个节点，不能是集群中的其它节点。这对前置的负载均衡器(有软、硬之分，软的如nginx负载均衡插件)有一定要求，即要设置成会话粘滞模式(session sticky)。
+
+Session sticky，某种程度上解决了应用节点的线性可伸缩。但它也有自身不足。首先，要实现合适的负载均衡算法，既要高效不影响性能，有要保证会话均衡灵活分布。其次，大型互联网应用往往有高可用需求，当某一应用节点失效时，前端的负载均衡器虽然可以判断出该节点失效，实施失效转移，把后续请求转移到其它节点上，可会话状态无法转移了，跑在这一节点上的会话将全部失效。
+
+有没有更好的办法？
+
+这就涉及到大型互联网应用架构的一个要点：有状态分离，将应用设计成无状态的。
+
+无状态应用，意味着来自同一会话的http请求，可以在任何一个应用节点处理，集群中的任何应用节点，都是无差别的。即使某应用节点失效了，请求仍可在其它节点得到处理。这就好比乘客到车站购票，某个窗口售票员有其它事情关闭窗口暂停售票，乘客可到其它窗口继续购票一样，系统高并发，高可用性得到很好满足。
+
+有状态分离，分离到哪里呢？可以把它分离到session服务器中，由session服务器专门管理应用的状态。
+
+利用Redis来实现Session状态服务器有几个显著优点：
+
+1.session的结构是name-value属性名称值对，即Map结构，而Redis支持Map数据类型，正好匹配，这样可以直接操作session中的属性，不需要将整个session取出，粒度细，效率高。
+
+2.session都有有效期控制，这是因为服务端无法判断准确客户端是否在线，当在一定时间内session没有被访问时即认为用户已经离开，即我们要给session一个生存有效期，有效期过，session自动销毁。Redis的键值本身就支持有效期特性，实现起来很方便。
+
+3.既然session服务器是用来解决大规模应用的高并发、高可用的，那它本身也得支持应用的高并发高可用，即session服务器应该是线性可伸缩的，而前面文章我们介绍的Redis sharding，很好地满足这一需求。同时，Redis基于内存，很好地满足了系统的高性能需求。
+
+下面就简要介绍下基于Redis的Session服务器实现基本原理。
+
+首先，我们看下主体设计图：
+q1
+
+由图可知，Session服务器对外提供了一个接口，叫SessionManager。SessionManager处于web接入层，负责浏览器客户端会话标识与服务端会话之间关系维护，是应用使用Session功能的入口。
+
+Session服务的内部实现对应用来说，是看不见的。SessionManager提供了往会话中设置属性名称值对、根据属性名返回其属性值以及销毁整个会话等方法。
+
+SessionManagerImpl是其实现，SessionManagerImpl重要处理cookie中session标识与服务端session的对应关系，而session内容的具体存储管理交由另一个组件SessionRegistry负责。SessionManagerImpl核心代码如下：
+
+@Override
+public void setAttribute(String name, Object value,
+                  HttpServletRequest request, HttpServletResponse response) {
+
+  Cookie[] cookies = request.getCookies();
+
+  if(null!=cookies){
+    for(Cookie cookie : cookies){
+      if(cookie.getName().equals(SessionManager.SESSION_ID)){
+        if(sessionRegistry.isValid(cookie.getValue())){ //Session存在
+          logger.debug("sessionId key {} exists and is valid.",cookie.getValue());
+          sessionRegistry.setAttribute(cookie.getValue(),name,value);
+          return;
+        }
+        break;
+      }
+    }
+  }
+
+  String sessionId = sessionIdGenerator.getId();
+  sessionRegistry.setAttribute(sessionId, name, value);
+  logger.debug("setting a new cookie for sessionId {}.", sessionId);
+  Cookie newCookie = new Cookie(SessionManager.SESSION_ID,sessionId);
+  newCookie.setDomain(domain);
+  newCookie.setPath(path);
+  response.addCookie(newCookie);
+
+}
+
+@Override
+public Object getAttribute(String name, HttpServletRequest request) {
+
+  Cookie[] cookies = request.getCookies();
+  if(null!=cookies){ 
+    for(Cookie cookie : cookies){
+      if(cookie.getName().equals(SessionManager.SESSION_ID)){
+        return sessionRegistry.getAttribute(cookie.getValue(), name);
+      }
+    }
+  }
+  //没找到会话标识
+  logger.debug("not found.the session does not exist.", name);
+  return null;
+}
+
+@Override
+public void destroySession(HttpServletRequest request, HttpServletResponse response) {
+
+  Cookie[] cookies = request.getCookies();
+  if(null==cookies) return;
+
+  for(Cookie cookie : cookies){
+    if(cookie.getName().equals(SessionManager.SESSION_ID)){
+      sessionRegistry.destroySession(cookie.getValue());
+      logger.debug("deleting the sessionId cookie.", SessionManager.SESSION_ID);
+      cookie.setDomain(domain);
+      cookie.setPath(path);
+      cookie.setMaxAge(0);
+      response.addCookie(cookie);
+      return;
+    }
+  }
+}
+RedisSessionRegistry是SessionRegistry的具体实现，基于Jedis客户端访问Redis,其核心代码如下：
+
+@Override
+public void setAttribute(String sessionId, String name, Object value) {
+
+  logger.debug("setting session key {} 's field {} with value {}", sessionId, name, value);
+  Jedis jedis = jedisPool.getResource();
+  ByteArrayOutputStream bos = new ByteArrayOutputStream();
+  ObjectOutputStream oos = null;
+
+  try{
+      oos = new ObjectOutputStream(bos);
+      oos.writeObject(value);
+
+  }catch(IOException e){
+    logger.error("serializing value {}  error.", value);
+  }finally{
+    try{ 
+      if(null!=oos) oos.close();
+    }catch(IOException e){
+      logger.error("closing error when serializing value {} to redis.", value);
+    }
+  }
+  jedis.hset(sessionId.getBytes(), name.getBytes(), bos.toByteArray());
+  refreshSession(sessionId);
+  jedis.close();
+}

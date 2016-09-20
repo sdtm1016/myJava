@@ -1,0 +1,68 @@
+ 
+ 在TCP/IP协议中出了TCP协议外有个UDP协议,相对而言UDP不如TCP广泛
+ 	几个标准的应用协议HTTP,FTP,SMTP..等都使用的是TCP协议
+ 	但UDP协议可以应用在需要很强的实时交互场合,如网络游戏,视频会议等
+
+什么是Datagram
+	数据报(Datagram)就跟日常胜过中邮件系统一样,是不能保证可靠的寄送的
+	而面向链接的TCP就好比电话,上方肯定对方节后到了信息
+	TCP:可靠,传输大小无限制,但是需要链接建立时间,差错控制开销大(广播确认)
+	UDP:不可靠,差错控制开销较小,传输大小现在在64k一下,不需要建立连接
+	
+a.DatagramPacket与DatagramSocket位于Java.net包中
+b.DatagramPacket表示存放数据的数据报，DatagramSocket表示接受或发送数据报的套接字
+c.由这两个类所有构成的网络链接是基于UDP协议，是一种不可靠的协议。
+
+	之所以不可靠是因为发送方不负责数据是否发送成功，接收方收到数据时也不会
+	向发送方反馈成功消息，容易导致信息的丢失。
+	但是这种协议却是快捷的，比如CS(半条命)游戏就是基于UDP协议，
+
+http://www.apihome.cn/api/java/DatagramSocket.html
+public class DatagramSocket extends Object
+	此类表示用来发送和接收数据报包的套接字。
+	数据报套接字是 一个包投递服务 的发送或接收点。
+	每个在数据报套接字上发送或接收的包都是单独编址和路由的。
+	从一台机器发送到另一台机器的多个包可能选择不同的路由，也可能按不同的顺序到达。
+	在 DatagramSocket 上总是启用 UDP 广播发送。
+	为了接收广播包，应该将 DatagramSocket 绑定到通配符地址。
+	在某些实现中，将 DatagramSocket 绑定到一个更加具体的地址时广播包也可以被接收。
+	示例：DatagramSocket s = new DatagramSocket(null); 
+	s.bind(new InetSocketAddress(8888)); 
+	这等价于：DatagramSocket s = new DatagramSocket(8888);
+	 两个例子都能创建能够在 UDP 8888 端口上接收广播的 DatagramSocket。 
+	 
+DatagramSocket发送的每个包都需要指定地址，而Socket则是在首次创建时指定地址，以后所有数据的发送都通过此socket。
+
+要建立基于UDP协议的链接，
+	我们应该先建立套接字<DatagramSocket>(即发送站或接收站),
+	之后通过套接字发送或接受数据<DatagramPacket>。
+DatagramSocket类：
+　　构造方法：DatagramSocket():
+表示创建一个默认的套接字，并绑定到本地地址和一个随机的端口号
+　　DatagramSocket(int port):与上面不同的是，绑定到特定端口号，其它不变
+　　DatagramSocket(int port, InetAddress iad):表示创建一个套接字，绑定到特定的端口号及指定地址
+　　DatagramSocket(SocketAddress sad);表示创建一个套接字，绑定到特定的套接字地址
+小提示：所谓的本地地址我们可以这样来理解，
+	我们通过“控制面板-本地连接-支持”中可以看到一个IP地址，这就是本地的IP地址，也暂且理解为本地地址。
+基本方法：
+	close():关闭套接字
+	recevie(DatagramPacket dp):接受数据报
+	send(DatagramPacket dp):发送数据报
+
+这里触及了数据报，下面介绍数据报：
+DatagramPacket类：
+构造方法：(只列出主要的)
+	接受类型：
+		DatagramPacket(byte[] buf, int length):
+			用来接受长度为length的buf数据(即数据存于字节数组buf中)
+	发送类型：
+		DatagramPacket(byte[] buf, int length, InetAddress address, int port);
+			将length长的buf数据发送到指定的地址的端口号处
+		DatagramPacket(byte[] buf, int length, SocketAddress address);
+			将length长的buf数据发送到指定的套接字地址处
+有上面可知，我们发送数据时构造的数据报应该是发送类型的，而接受数据报时应该是接受类型的　 　　
+代码意图：
+　　1.一个接收方，一个发送方
+　　2.当接收方收到发送方发送的消息后，打印发送的消息及发送方的地址和端口号，
+	之后向发送反馈一条信息“接受方：我收到了！”
+　　3.发送方打印出接收方反馈的消息

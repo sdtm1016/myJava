@@ -1,0 +1,75 @@
+
+清除数据clear(); 
+	indexOf(Object o)判断o链表中是否存在节点的element和o相等，
+	若相等则返回该节点在链表中的索引位置，若不存在则放回-1。
+
+数据包含 contains(Object o); 
+	contains(Object o)方法通过判断indexOf(Object o)方法返回的值是否是-1来判断链表中是否包含对象o。
+
+删除数据remove()
+几个remove方法最终都是调用了一个私有方法：remove(Entry<E> e)，只是其他简单逻辑上的区别。
+下面分析remove(Entry<E> e)方法。
+	由于删除了某一节点因此调整相应节点的前后指针信息，如下：
+		e.previous.next = e.next;//预删除节点的前一节点的后指针指向预删除节点的后一个节点。 
+		e.next.previous = e.previous;//预删除节点的后一节点的前指针指向预删除节点的前一个节点。 
+	清空预删除节点：
+		e.next = e.previous = null;
+		e.element = null;
+		交给gc完成资源回收，删除操作结束。
+与ArrayList比较而言，LinkedList的删除动作不需要“移动”很多数据，从而效率更高。
+
+数据获取get()
+Get(int)方法的实现在remove(int)中已经涉及过了。
+	首先判断位置信息是否合法（大于等于0，小于当前LinkedList实例的Size），
+	然后遍历到具体位置，获得节点的业务数据（element）并返回。
+注意：为了提高效率，需要根据获取的位置判断是从头还是从尾开始遍历。
+注意细节：位运算与直接做除法的区别。
+	先将index与长度size的一半比较，
+		如果index<size/2，就只从位置0往后遍历到位置index处，
+		而如果index>size/2，就只从位置size往前遍历到位置index处。
+	这样可以减少一部分不必要的遍历
+
+
+数据复制clone()与toArray()
+clone()
+	调用父类的clone()方法初始化对象链表clone，将clone构造成一个空的双向循环链表，
+	之后将header的下一个节点开始将逐个节点添加到clone中。最后返回克隆的clone对象。
+
+toArray()
+	创建大小和LinkedList相等的数组result，遍历链表，将每个节点的元素element复制到数组中，返回数组。
+
+toArray(T[] a)
+	先判断出入的数组a的大小是否足够，若大小不够则拓展。
+	这里用到了发射的方法，重新实例化了一个大小为size的数组。
+	之后将数组a赋值给数组result，遍历链表向result中添加的元素。
+	最后判断数组a的长度是否大于size，若大于则将size位置的内容设置为null。返回a。
+从代码中可以看出，
+	数组a的length小于等于size时，a中所有元素被覆盖，被拓展来的空间存储的内容都是null；
+	若数组a的length的length大于size，则0至size-1位置的内容被覆盖，size位置的元素被设置为null，size之后的元素不变。
+
+遍历数据：Iterator()
+	LinkedList的Iterator
+	除了Entry，LinkedList还有一个内部类：ListItr。
+ListItr实现了ListIterator接口，可知它是一个迭代器，通过它可以遍历修改LinkedList。
+在LinkedList中提供了获取ListItr对象的方法：listIterator(int index)。
+该方法只是简单的返回了一个ListItr对象。
+LinkedList中还有通过集成获得的listIterator()方法，该方法只是调用了listIterator(int index)并且传入0。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
