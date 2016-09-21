@@ -38,7 +38,7 @@ java IO体系中，java.io.ObjectOutputStream和java.io.ObjectInputStream
 
 DataInputStream/DataOutputStram
 数据输入输出流
-http://blog.csdn.net/baple/article/details/3849466
+http://blog.csdn.net/baple/article/details/38494663
 包装类DataOutputStream、DataInputStream为我们提供了多种对文件的写入和读取方法，
 如writeBoolean(),writeUTF()，writeChar，writeByte()，writeDouble()等和对应的read方法，
 这些方法极大的方便了我们的写入和读取操作，下面结合一个程序来探讨一下这些方法的使用。

@@ -1,0 +1,123 @@
+
+    FileInputStream类、  
+          1、结构 继承了java.io.InputStream                      
+          2、常用功能：以字节方式读取磁盘上文件的类  
+          3、常用构造方法：  
+                 FileInputStream fis=new FileInputStream("文件路径")；  
+          4、使用：  
+                 fs.read();读一个字节。  
+     FileReader类、  
+          1、结构 继承了java.io.InputStreamReader(继承了java.io.Reader)           
+          2、常用功能：以字符的方式读取磁盘上文件的类  
+          3、常用构造方法：  
+                 FileReaderfis=new FileReader("文件路径")；  
+          4、使用：  
+                 fs.read();读一个字符。  
+     FileOutputStream类、  
+          1、结构 继承了java.io.OutputStream         
+          2、常用功能：以字节的方式写入磁盘上文件的类  
+          3、常用构造方法：  
+                 FileOutputStream out=new FileOutputStream("文件路径")；  
+          4、使用：  
+                 out.write()写一个字符。  
+     FileWriter类、  
+          1、结构 继承了 java.io.OutputStreamWriter( 继承了java.io.Writer)    
+          2、常用功能：以字符的方式往磁盘上写文件  
+          3、常用构造方法：  
+                 FileWriter out=new FileWriter("文件路径")；  
+          4、使用：  
+                 out.write()写一个字符。     
+    BufferedInputStream类、  
+          1、结构 继承了 java.io.FilterInputStream( 继承了 java.io.InputStream)                
+          2、常用功能：封装文件输入流(FileInputStream)，以字节方式读取磁盘上文件的类  
+          3、常用构造方法：  
+                 BufferedInputStream fis=new FileInputStream("FileInputStream类的对象");  
+                 BufferedInputStream(InputStream in)   
+          4、使用：  
+                 fs.read();读一个字节。  
+    BufferedReader类、  
+          1、结构 继承了 java.io.Reader            
+          2、常用功能：封装文件输出流(FileWriter)，以字符方式读取磁盘上文件的类  
+          3、常用构造方法：  
+                 BufferedInputStream fis=new BufferedInputStream ("FileReader类的对象");  
+                 BufferedReader(Reader in)   
+          4、使用：  
+                 fis.readLine();读取一行数据。  
+    BufferedWriter类、  
+          1、结构 继承了java.io.Writer   
+          2、常用功能：以字符的方式往磁盘上写文件  
+          3、常用构造方法：  
+                 BufferedWriter out=new BufferedWriter(FileWriter类的对象")；  
+          4、使用：  
+                out.write(s);  
+                out.newLine();  
+    ByteArrayInputStream类、  
+          1、结构 继承了java.io.InputStream                    
+          2、常用功能：读入byte型数组  
+          3、常用构造方法：  
+                ByteArrayInputStream(byte[] buf)  
+          4、使用：  
+                  
+    ByteArrayOutputStream 类  
+          1、结构 继承了java.io.OutputStream                    
+          2、常用功能：获取一个byte型数组  
+          3、常用构造方法：  
+                ByteArrayInputStream(byte[] buf)  
+          4、使用：   
+                 对象.toArray();  
+    DataInputStream类  
+         1、结构 继承了java.io.FilterInputStream (继承了java.io.InputStream)                   
+          2、常用功能：读入某种类型的数据  
+          3、常用构造方法：  
+               DataInputStream(InputStream in)   
+          4、使用：  
+                传入一个ByteArrayInputStream对象进行定义  
+                readByte();readChar();readInt;  
+    DataOutputStream类  
+          1、结构 继承了java.io.FilterOutputStream(继承了java.io.OutputStream)                    
+          2、常用功能：向文件写入某种类型的数据  
+          3、常用构造方法：  
+                DataOutputStream(OutputStream out)   
+          4、使用：   
+                 传入一个ByteArrayOutputStream 对象进行定义  
+                 writeByte();writeChar();writeInt;  
+          5、提示：ByteArrayInputStream、ByteArrayOutputStream 、DataInputStream、DataOutputStream通常一起使用。  
+    PrintStream类  
+          1、结构 继承了java.io.FilterOutputStream(继承了java.io.OutputStream)                    
+          2、常用功能：指定标准输出的流类型  
+          3、常用构造方法：  
+                PrintStream(OutputStream out)   
+          4、使用：               
+              ps=new PrintStream(fis);  
+           System.setOut(ps);  
+              System.out.println("asdgasg");//信息会打印在流fis上   
+    OutputStreamWriter类  
+          1、结构 继承了java.io.Writer                  
+          2、常用功能：其转换作用将字节输出流转换为字符输出流  
+          3、常用构造方法：  
+               OutputStreamWriter(OutputStream out)   
+               OutputStreamWriter(OutputStream out, Charset cs)   
+          4、使用：               
+                  out.write();  
+    InputStreamReader类  
+          1、结构 继承了java.io.Reader                  
+          2、常用功能：其转换作用将字节输入流转换为字符输入流  
+          3、常用构造方法：  
+               InputStreamReader(InputStream in)   
+               InputStreamReader(InputStream in, Charset cs)   
+          4、使用：               
+                  in.read()   
+    ObjectOutputStream  
+          1、结构 继承了java.io.OutputStream              
+          2、常用功能：输出一个对象类型  
+          3、常用构造方法：  
+              ObjectOutputStream(OutputStream out)   
+          4、使用：               
+                  out.writeObject(Object obj)  
+    ObjectInputStream  
+          1、结构 继承了java.io.InputStream              
+          2、常用功能：输入一个对象类型  
+          3、常用构造方法：  
+              ObjectOutputStream(OutputStream out)   
+          4、使用：               
+                  out.readObject()   

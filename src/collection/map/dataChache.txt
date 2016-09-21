@@ -1,0 +1,40 @@
+一般是采用HashMap来作为缓存的存储结构，但Java没有全局变量的概念，
+怎么保证缓存中的数据不被垃圾回收器收集，而造成数据的丢失呢？  
+请问一般的缓存是怎样保证数据的独立性（即脱离垃圾回收器）的？  
+做一个判断，HashMap取不到值就到数据库里再读数据
+系统第一次起来，或是第一次取数据后将数据,保存在一个static的Map里即可,凡是缓存的东西总是经常用到的,所以一般是保持强引用,GC应该会清理
+
+(1)jive里面,是使用单态模式维护一个工厂实例,做为程序的入口,就是无论有多少个在线用户,
+都只要从该入口进入.在这个工厂实例中,
+有一个缓存管理类(DatabaseCacheManager)变量,这个类有几个公有变量,
+如DbUserCache(就是缓存访问过的用户)等.当要获取一个user的用户信息时,
+它就会先在DbUserCache中查找,如果找不到,那么就从数据库中读取,再放入缓存中.
+
+singleton模式：  
+  public   class   DataCache   {  
+          protected   static   final   HashMap   map   =   new   HashMap();   //   Cache   table  
+   
+          private   static   final   Object   lock   =   new   Object();  
+          private   DataCache()   {}   //   防止在外部实例化  
+          public   static   Object   getData(Object   key)   {  
+                  Object   v   =   map.get(key);  
+                  if   (v   ==   null)   {  
+                        synchronized(lock)   {    
+                        v   =   map.get(key);     //   Check   again   to   avoid   re-load  
+                        if   (v   ==   null)   loadDataSource(key);    
+                        v   =   map.get(key);   //   retrieves   data.  
+                        }  
+   
+                  }  
+   
+                  return   v;  
+                   
+          }  
+          /*  
+            *Load   data   from   data   source.  
+            */  
+          protected   static   synchronized   void   loadDataSource(Object   key)   {  
+                  Object   value   =   new   Object();   //   Load   value   from   data   source  
+                  map.put(key,   value);  
+          }  
+  }

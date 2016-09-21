@@ -1,0 +1,51 @@
+用到java来实现多线程环境下的单件模式例子，才发现关于synchronized还是有一些地方需要比较小心的。
+
+synchronized是对当前的实例进行加锁，要注意是“当前实例”，
+也就是说，假如你有两个实例化对象，那么可以同时访问这两个实例里面的synchronized块。
+但是，当访问一个实例里面的一个synchronized块时，该实例其余的synchronized块是不可同时访问的，
+原因是整个实例都被加了锁。
+那假如说是static synchronized时会怎么样呢? 
+	那么static synchronized恰好就是要控制类的所有实例的访问了，
+	static synchronized是限制线程同时访问jvm中该类的所有实例同时访问对应的代码块。
+	实际上，假如类中某一个方法或者说某个代码块是synchronized的话，
+	那在实例化时就会自动生成一个监视块，用于不同线程之间访问的互斥。
+	而static synchronized则是所有该类的实例公用一个监视块了。
+
+	有一个例子：
+	pulbic class Something(){
+	　　public synchronized void isSyncA(){}
+	　　public synchronized void isSyncB(){}
+	　　public static synchronized void cSyncA(){}
+	　　public static synchronized void cSyncB(){}
+	}
+	那么，加入有Something类的两个实例x与y，那么下列组方法可以被1个以上线程同时访问呢?
+	a.   x.isSyncA()与x.isSyncB()
+	b.   x.isSyncA()与y.isSyncA()
+	c.   x.cSyncA()与y.cSyncB()
+	d.   x.isSyncA()与Something.cSyncA()
+	
+	a的话是同个实例中的，故不可以;
+	b中是不同实例的，所以可以同时访问;
+	c中是针对static synchronized，上文所说所有的static方法共用一个监视块，故不能够同时访问;
+	那么d呢?实际上是可以的，原因可以自己思考一下。
+	
+	同时还有一点，synchronized关键字是不能够继承的。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

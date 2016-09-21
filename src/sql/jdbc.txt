@@ -1,0 +1,9 @@
+jdbc: java database connection,java的数据库联机
+	准备工作,下载驱动程序,添加驱动到classpath下
+编程:
+	注册驱动(只做1次)
+	建立连接(connection)
+	创建执行sql的语句(statement)
+	执行语句
+	处理执行结果(resultSet)
+	释放资源

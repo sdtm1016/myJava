@@ -101,4 +101,6 @@ BufferedOutputStream-->FilterOutputStream-->OutputStream implements Closeable, F
 BufferedInputStream-->FilterInputStream-->InputStream implements Closeable
 	close释放与之关联的系统资源,多次关闭没有影响,从外部向里面关闭
 
+其他参考:
+https://www.ibm.com/developerworks/cn/java/j-lo-javaio/
 

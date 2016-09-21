@@ -1,4 +1,4 @@
-package net.url.myThread;
+package net.url;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

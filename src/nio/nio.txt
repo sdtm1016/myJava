@@ -1,0 +1,63 @@
+NIO
+	原有io有太多的软件层次需要提速;其实就会大数据大量复制
+	在不切换线程上下文的情况下没有办法在多个源之间进行数据的赋值
+	也无法利用现代os的高性能io特性,比如内存和file的映射
+Buffer
+	Buffer类允许在jvm和os之间使用很小的内存到内存复制技术来移动数据,
+	而不需要过渡开销,比如像切换字节的顺序.
+	高效的Buffer类让java在系统内存方面开启了一扇"窗口".
+	
+	统一的Channel类族循序在Buffer和文件或Socket之间直接交换数据
+	而不需要向原有Stream类那样借助于中间媒介
+	
+	NIO首次提供了文件锁定机制
+DataInputStream
+allocationg
+	直接缓冲区是为加快I/O速度，使用一种特殊方式为其分配内存的缓冲区，JDK文档中的描述为：
+	给定一个直接字节缓冲区，Java虚拟机将尽最大努力直接对它执行本机I/O操作。
+	也就是说，它会在每一次调用底层操作系统的本机I/O操作之前(或之后)，
+	尝试避免将缓冲区的内容拷贝到一个中间缓冲区中或者从一个中间缓冲区中拷贝数据。
+	要分配直接缓冲区，需要调用allocateDirect()方法，而不是allocate()方法，使用方式与普通缓冲区并无区别
+
+wrapping//包装
+HeapByteBuffer//堆缓冲区
+off-heap//堆外空间,交给本地方法,操作系统完成,系统内核使用的内存(page)
+
+ByteBuffer是NIO里用得最多的Buffer，它包含两个实现方式：
+============================================
+	HeapByteBuffer是基于Java堆的实现，
+	而DirectByteBuffer则使用了unsafe的API进行了堆外的实现。这里只说HeapByteBuffer。
+
+http://blog.csdn.net/baple/article/details/12749005
+nio.ByteBuffer内部字段
+	byte[] buff: buff即内部用于缓存的数组。
+	position:当前读取的位置。类似于指针
+	mark:为某一读过的位置做标记，便于某些时候回退到该位置。
+	capacity: 初始化时候的容量。数组的length
+	limit: 读写的上限，limit<=capacity。
+	mark <= position <= limit <= capacity
+理解:
+buff假设初始化容量capacity为10,mark从-1开始,position为0,limit=capacity
+put
+写模式下，往buffer里写一个字节，并把postion移动一位。写模式下，一般limit与capacity相等。 
+flip
+写完数据，需要开始读的时候，将postion复位到0，并将limit设为当前postion。 
+get
+从buffer里读一个字节，并把postion移动一位。上限是limit，即写入数据的最后位置。 
+clear
+将position置为0，并不清除buffer内容。
+
+mark相关的方法主要是mark()(标记)和reset()(回到标记)，比较简单，就不画图了。
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -32,6 +32,7 @@ public class DowloadThread extends Thread {
 			InputStream is = conn.getInputStream();
 			// 定位本地文件
 			RandomAccessFile raf = new RandomAccessFile(info.getLocal(), "rw");
+			System.out.println("RandomAccessFile seek: " + info.getStartPos());
 			raf.seek(info.getStartPos());
 
 			byte[] buf = new byte[1024];

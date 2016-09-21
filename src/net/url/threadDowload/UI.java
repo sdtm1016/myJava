@@ -73,8 +73,9 @@ public class UI extends JFrame {
 				String local = tfLocal.getText();
 				int count = Integer.parseInt(tfCount.getText());
 				DowLoaderManager mgr = new DowLoaderManager(url, local, count, UI.this);
+
 				mgr.start();
-			//	bar.setValue(0);
+				bar.setValue(0);
 				bar.setVisible(true);
 			}
 		});
@@ -105,6 +106,7 @@ public class UI extends JFrame {
 	public synchronized void updataProcessBar(int len) {
 		int newValue = bar.getValue() + len;
 		bar.setValue(newValue);
+
 		if (newValue >= bar.getMaximum()) {
 			JDialog dialog = new JDialog();
 			dialog.setTitle("下载完成!");

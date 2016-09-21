@@ -59,7 +59,7 @@ public class GUI extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				String text = inputArea.getText();
-				//System.out.println(text);
+				// System.out.println(text);
 				ClientSocket clientSocket = ClientSocket.getInstance(GUI.this);
 				clientSocket.sendText(text + "\r\t");
 				inputArea.setText("");// 清空输入区
@@ -71,7 +71,8 @@ public class GUI extends JFrame {
 		// frendsList = new JTable(model);
 		frendsList.setBounds(470, 0, 100, 350);
 		this.add(frendsList);
-
+		this.repaint();// 重绘
+		
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 

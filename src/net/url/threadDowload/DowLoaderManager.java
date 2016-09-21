@@ -29,8 +29,6 @@ public class DowLoaderManager {
 
 		// 准备下载
 		prepareDowload();
-		// 开始下载
-		start();
 	}
 
 	/**
@@ -43,8 +41,12 @@ public class DowLoaderManager {
 			// 1.提取文件大小
 			URL url0 = new URL(url);
 			this.totalLength = url0.openConnection().getContentLength();
-
-			// 1.1 设置ui进度条最大值
+			// 1.1
+			if (totalLength < 0) {
+				System.err.println("无效路径,或网络连接异常");
+				return;
+			}
+			// 1.2 设置ui进度条最大值
 			ui.setProgressbarMax(totalLength);
 
 			// 2.创建本地文件

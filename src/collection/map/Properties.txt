@@ -1,0 +1,49 @@
+ Java中有个比较重要的类Properties（Java.util.Properties），
+ 	主要用于读取Java的配置文件，各种语言都有自己所支持的配置文件，
+ 配置文件中很多变量是经常改变的，这样做也是为了方便用户，让用户能够脱离程序本身去修改相关的变量设置。
+	 像Python支持的配置文件是.ini文件，
+	 	同样，它也有自己读取配置文件的类ConfigParse，
+	 	方便程序员或用户通过该类的方法来修改.ini配置文件。
+	 在Java中，其配置文件常为.properties文件，
+	 	格式为文本文件，
+	 	文件的内容的格式是“键=值”的格式，文本注释信息可以用"#"来注释。
+
+
+Properties类继承字Hashtable类，采用键值对应的存储方式
+Properties类有通过一个读写流来读写Properties属性文件,
+//读取属性文件流的方法      
+ load( InputStream inStream)，
+ 	从输入流中读取属性列表（键和元素对）。
+ 	通过对指定的文件（比如说上面的 test.properties 文件）进行装载来获取该文件中的所有键 - 值对。
+ 	以供 getProperty ( String key) 来搜索。
+ 	读取Properties文件: http://blog.csdn.net/Senton/article/details/4083127
+ 	最常用的还是通过Class类的getResourceAsStream(String name)方法来实现:
+ 	InputStream in = getClass().getResourceAsStream("资源Name");作为我们写程序的，用此一种足够。
+	或者下面这种也常用：
+	InputStream in = new BufferedInputStream(new FileInputStream(filepath));
+
+
+//写属性文件流的方法      
+ store( OutputStream out, String comments)，
+ 	以适合使用 load方法加载到 Properties表中的格式，
+ 	将此 Properties表中的属性列表（键和元素对）写入输出流。
+ 	与 load方法相反，该方法将键 -值对写入到指定的文件中去。
+getProperty( String key)
+	用指定的键在此属性列表中搜索属性。也就是通过参数 key ，得到 key 所对应的 value。
+setProperty( String key, String value)
+ 	调用 Hashtable的方法 put。他通过调用基类的put方法来设置 键 -值对。
+
+
+
+
+
+在我们知道如何读写一个属性文件之后，我们仍然还有很多需要注意的问题，
+因为load和store方法都是按照ISO-8859-1的编码方式读写属性流文件的，
+而ILatin1 的字符和某些特殊字符，而对于非Latin1 的字符和某些特殊字符，
+则要使用与字符和字符串字面值所用的类似转义序列，以值和元素的形式来表示它们。
+所以当我们在处理中文时，不可以在直接修改属性文件时，将中文的值赋予给属性，
+而是要在JAVA程序中通过setProperty方法给属性赋予中文的值，
+因为这样store会将中文转换成 unicode码，在读取时系统会将读取到的unicode码按系统的编码打印出来，
+对于中文系统，通常是GBK码，这样中文才能够正常显示。
+    
+    
