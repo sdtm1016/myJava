@@ -102,6 +102,21 @@ Java虚拟机在执行的过程中会把它所管理的内存划分为若干个�
 			新生代又分为三个部分：一个Eden区和两个Survivor区，比例为8：1：1。
 			Eden区存放新生的对象。
 			Survivor存放每次垃圾回收后存活的对象。
+			jvm区域总体分两类，heap区和非heap区。
+				heap区又分：Eden Space（伊甸园）、Survivor Space(幸存者区)、Tenured Gen（老年代-养老区）。
+				非heap区又分：Code Cache(代码缓存区)、Perm Gen（永久代）、Jvm Stack(java虚拟机栈)、Local Method Statck(本地方法栈)。
+				
+			Eden Space (heap)
+			内存最初从这个线程池分配给大部分对象。
+			Survivor Space (heap)
+			用于保存在eden space内存池中经过垃圾回收后没有被回收的对象。
+			Tenured Generation (heap)
+			用于保持已经在survivor space内存池中存在了一段时间的对象。
+			Permanent Generation (non-heap)
+			保存虚拟机自己的静态(reflective)数据，例如类（class）和方法（method）对象。Java虚拟机共享这些类数据。这个区域被分割为只读的和只写的。
+			Code Cache (non-heap)
+			HotSpot Java虚拟机包括一个用于编译和保存本地代码（native code）的内存，叫做“代码缓存区”（code cache）。
+		 
 		整体上来看是分代收集算法，而S0、S1这两部分可以看做是标记-整理算法。
 	
 	深入理解分代收集算法:
