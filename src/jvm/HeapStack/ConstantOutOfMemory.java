@@ -2,8 +2,9 @@ package jvm.HeapStack;
 
 import java.util.ArrayList;
 import java.util.List;
-
-public class HelloConstantOutOfMemory {
+//-verbose:gc -XX:+PrintGCDetails
+//运行时常量池
+public class ConstantOutOfMemory {
 
 	public static void main(String[] args) {
 		try {

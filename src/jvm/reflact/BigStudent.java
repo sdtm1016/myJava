@@ -7,7 +7,7 @@
  */
 package jvm.reflact;
 
-public class BigStudent extends Strudent {
+public class BigStudent extends Student {
 	private int degree;
 
 	public int getDegree() {

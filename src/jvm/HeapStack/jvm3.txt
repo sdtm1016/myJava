@@ -1,0 +1,104 @@
+GC时候基本内存结构
+堆区:分为新生代和老年代
+		比例为1：2;由垃圾回收器的自动内存管理系统回收
+	Young Generation: Object产生和基本活跃区域,存放新生的对象
+		每次垃圾回收时都有大量的对象需要被回收
+		分为:Eden,From,To三个区域,比例为8：1：1
+		Eden:
+			内存最初从这个线程池分配给大部分对象
+		Survive:
+			用于保存在eden space内存池中经过垃圾回收后没有被回收的对象。
+			其中From和To不停交换,也可称为S1,S2(幸存者Survive)
+			Survive设计是为了减缓Eden到Old区域对象频次以及减少对象个数
+			从而避免过于频繁的full GC
+	Old Generation:经过几次GC后依旧存在
+		保持已经在survivor space内存池中存在了一段时间的对象。也称Tenured Generation
+		每次垃圾收集时只有少量对象需要被回收
+方法区:
+	Permanent Generation:永久代,也就是方法区
+	保存虚拟机自己的静态(reflective)数据，例如类（class）和方法（method）对象。
+	Java虚拟机共享这些类数据。这个区域被分割为只读的和只写的。
+	一般不会被GC,只有如一个类所有实例对象已经销毁同时对应ClassLoader也已经销毁,才有可能
+其他:
+	Code Cache (non-heap)
+		HotSpot Java虚拟机包括一个用于编译和保存本地代码（native code）的内存，叫做“代码缓存区”（code cache）。
+		 
+	堆区划分为老年代（Old Generation）和新生代（Young Generation），
+		老年代的特点是每次垃圾收集时只有少量对象需要被回收，
+		而新生代的特点是每次垃圾回收时都有大量的对象需要被回收，
+		那么就可以根据不同代的特点采取最适合的收集算法。
+		这就是分代回收算法。
+
+--------------------------------------------------------------
+JVM GC的内存管理,通过工作流程阐述:
+	不断分配对象-->放到Eden区-->Eden区满-->新生代GC：Minor GC
+		把Eden区的存活对象copy到Survivor A区，然后清空Eden区
+	-->Eden区又满-->新生代GC：Minor GC
+		把Eden区和Survivor A区的存活对象(通过扫面检测)copy到Survivor B区，
+		copy过程完成后,清空Eden区和Survivor A区;
+			这里Survivor检测算法是考虑幸存者的年龄age(经历GC次数)
+			到达阈值将会copy到Old区,如果没有则直接copy到另一个Survivor区域
+		
+		这里关于JVM内存分配策略,对对象按照周期长短(使用频繁),空间大小进行分类,
+		1.周期长的经过n次GC将其移动到Old区域,
+		2.空间大的直接移动到Old区,参数用-XX:PretenureSizeThreshold来控制直接升入老年代的对象大小
+		3.还有一种情况,Service的To区域满,GC中多余的对象将直接放入Old区域
+		详情参考:http://www.cnblogs.com/ggjucheng/p/3977384.html
+		http://www.cnblogs.com/zhguang/p/3257367.html
+	
+	-->如此,Old区对象在Minor GC中对象不断增加,Old区域满(n个小时才会发生一次)
+	-->老年代GC：Major GC-->Old区慢慢的整理一番
+
+频繁GC的原因初步分析
+	heap空间分配小,对象实例化以及释放频繁,
+		如Scala是函数式编程语言,创建后一般不会修改,这里原因:
+		如果改变,将导致内存管理出现频繁GC,而不可变一般要进行复用
+		当然复用是一把双刃剑,cache命中率很高的话会很好,如果不高将占用内存空间
+	一般heap剩余空间在50%-70%之间相对比较健康,对heap空间观察参考下文
+
+其他参考:
+	http://blog.csdn.net/kobejayandy/article/details/8496663
+-----------------------------------------------------
+参数:
+	-XX:NewRatio
+		新生代与年老代相对比例,默认1:2,动态调整
+		年老代满后进行Full GC,所以设置一般要大于新生代
+	-XX:SurvivorRatio
+		新生代中Eden和Survivor比例,默认8:1:1,即8
+		如果Survivor比较小的话,GC将对象直接放入Old区域,所以Survivor不能特别小
+		相反如果Eden比较小,将进行频繁GC
+	-XX:NewSize和-XX:MaxNewSize
+		新生代初始大小和最大大小;
+		如果同时指定NewRatio和NewSize,MaxNewSize,
+		则是按照heap空间的NewRatio对应比例分配新生代
+		且其空间大小不会小于NewSize的值,也不会大于MaxNewSize的值
+	JVM有2个GC线程
+		第一个线程负责回收Heap的Young区
+		第二个线程在Heap不足时，遍历Heap，将Young 区升级为Older区
+		Older区的大小等于-Xmx减去-Xmn，不能将-Xms的值设的过大，
+		因为第二个线程被迫运行会降低JVM的性能
+其他参数学习参考:http://itindex.net/detail/50346-jvm-新生代-垃圾回收
+		
+对象age问题:
+	在触发了Minor GC后，存活对象被存入Survivor区在经历了多次Minor GC之后，如果仍然存活的话，则该对象被晋升到Old区。
+	虚拟机既然采用了分代收集的思想来管理内存，那内存回收时就必须能识别哪些对象应当放在新生代，哪些对象应放在老年代中。
+	为了做到这点，虚拟机给每个对象定义了一个对象年龄（Age）计数器。
+	如果对象在Eden出生并经过第一次Minor GC后仍然存活，并且能被Survivor容纳的话，将被移动到Survivor空间中，并将对象年龄设为1。
+	对象在Survivor区中每熬过一次Minor GC，年龄就增加1岁，当它的年龄增加到一定程度（默认为15岁）时，就会被晋升到老年代中。
+	对象晋升老年代的年龄阈值，可以通过参数-XX:MaxTenuringThreshold来设置。
+	
+	理论上当age达到15次后,将会在下次GC时候copy到Old区域;实际上在GC时,对Survivor空间对象判断,
+	如果若干对象age相同,他们的个数大于等于Survivor空间一半,该组对象将直接进入Old
+	这样设计是对程序运行时动态调整,当然在进入Old Generation先判断对象大小与Old Generation剩余空间
+	如果对象大于剩余空间大小,将进行Full GC,这将比Minor GC耗时几十倍,如果小于剩余空间大小,
+	
+	相关参考:http://www.cnblogs.com/hnrainll/archive/2013/11/06/3410042.html
+		http://www.cnblogs.com/zhguang/p/3257367.html
+
+
+
+
+
+
+
+
