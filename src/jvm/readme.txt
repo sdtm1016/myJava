@@ -159,7 +159,6 @@ Java虚拟机在执行的过程中会把它所管理的内存划分为若干个�
 	http://www.importnew.com/15802.html
 	http://blog.csdn.net/future_ins/article/details/52166294
 	http://www.cnblogs.com/zhguang/p/3257367.html
-
 那么第三个问题：常见的CMS垃圾回收器的执行流程是怎样的？
 http://blog.csdn.net/u012723548/article/details/49966775
 	1.初始标记：GC Roots直接关联的对象。
@@ -170,6 +169,8 @@ CPU0,1..--用户线程1,2..-->所有线程停止进行初始标记-->单个线�
 -->所有线程停止重新标记-->单个线程停止进行并发请求-->单个线程停止进行重置线程
 可以看到只有在初始标记和重新标记的时候才需要Stop The World，
 其他都是和用户线程一起执行，不要以为这就完美了，并行执行的过程会消耗掉一些CPU资源
+其他参考:
+	https://github.com/cncounter/gc-handbook
 
 
 

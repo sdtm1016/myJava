@@ -88,7 +88,7 @@ Serial收集器
 	-XX：+UseSerialGC 参数可以指定使用新生代串行收集器和老年代串行收集器,
 	
 并行收集器
-并行:在具体GC的时候，有多个线程，提升了吞吐量，坏处在于线程切换是需要时间的。
+并行:在具体GC的时候，有多个线程，提升了吞吐量(throughput)，坏处在于线程切换是需要时间的。
 	它的回收策略、算法以及参数和串行回收器一样。也是独占式的回收器,采用stop the world的方式来进行GC。
 		在并发能力比较强的 CPU 上，它产生的停顿时间要短于串行回收器，
 		而在单 CPU 或者并发能力较弱的系统会由于多线程的压力，实际表现很可能比串行回收器差。
@@ -116,16 +116,32 @@ Serial收集器
 并发标记清除:CMS收集器(Concurrent Mark Sweep)
 并发:同一段时间，垃圾回收和具体的工作线程也会同时运行或者交叉运行，缩短了server被stop the world的影响。
 	与并行回收收集器不同，CMS 收集器主要关注于系统停顿时间即特点:
-		并发收集、低停顿
+		并发收集(高吞吐量throughput)、低停顿(pause times)
 	-XX:+UseConcMarkSweepGC 可以要求新生代使用并行收集器，老年代使用CMS
 	
 	CMS工作时，主要步骤有：
-		初始标记(CMS initial mark)
-		并发标记(CMS concurrent mark)
-		重新标记(CMS remark)
-		并发清除(CMS concurrent sweep)
-		并发重置
-		
+		初始标记(CMS initial mark):标记Roots直接关联的对象
+			(Stop the World Event,所有应用线程暂停),暂停时间一般持续时间较短
+			从root对象开始标记存活的对象,只扫描到能够和"根对象"直接关联的对象，并作标记
+			在老年代中的对象,如果从年轻代中能访问到,则被标记(marked)为可达的(reachable).
+		并发标记(CMS concurrent mark):在初始标记的基础上继续向下追溯标记
+			应用程序的线程和并发标记的线程并发执行,遍历老年代(tenured generation)的可达对象图.
+			从被标记的对象开始扫描,遍历完从root可达的所有对象. 
+				并发预清理:
+				调整器(mutators)在并发阶段的2、3、5阶段执行,
+				在这些阶段中新分配的所有对象(包括被提升的对象:进入或晋升到老年代的对象)都立刻标记为存活状态.
+		重新标记(CMS remark):收集器线程扫描在CMS堆中剩余的对象
+			(Stop the World Event, 所有应用线程暂停)
+			查找在并发标记阶段漏过的对象，这些对象是在并发收集器完成(并发标记)对象跟踪之后,由应用线程对对象状态更新导致的.
+			Remark阶段的并行，启动一定数目的垃圾回收进程进行并行标记，
+			扫描从"跟对象"开始向下追溯，并处理对象关联
+		并发清除(CMS concurrent sweep):清理垃圾对象
+			回收在标记阶段(marking phases)确定为不可及的对象. 
+			死对象的回收将此对象占用的空间增加到一个空闲列表(free list),供以后的分配使用。
+			死对象的合并可能在此时发生. 请注意,存活的对象并没有被移动.
+		并发重置(Resetting)
+			清理CMS收集器数据结构，等待下一次垃圾回收
+			
 		其中初始标记和重新标记是独占系统资源的，
 		而并发标记、并发清除和并发重置是可以和用户线程一起执行。
 		因此，从整体上来说，CMS 收集不是独占式的，它可以在应用程序运行过程中进行垃圾回收。
@@ -166,52 +182,13 @@ Serial收集器
 		-XX:CMSFullGCsBeforeCompaction 参数可以用于设定进行多少次 CMS 回收后，进行一次内存压缩。
 		-XX:CMSInitiatingOccupancyFraction 设置为 100，
 		同时设置-XX:+UseCMSCompactAtFullCollection 和-XX:CMSFullGCsBeforeCompaction
+		参考:http://www.iteye.com/topic/1119491
 
-G1收集器 (Garbage First)
-	G1收集器的目标是作为一款服务器的垃圾收集器，它在吞吐量和停顿控制上，预期要优于CMS收集器,特点:
-		紧凑的空闲空间,且没有很长的GC停顿时间
-		
-		与 CMS 收集器相比，G1 收集器是基于标记-压缩算法的。
-			因此，它不会产生空间碎片，也没有必要在收集完成后，进行一次独占式的碎片整理工作。
-		G1 收集器还可以进行非常精确的停顿控制。
-			它可以让开发人员指定当停顿时长为 M 时，垃圾回收时间不超过 N。
-	
-	G1收集器可以实现在基本不牺牲吞吐量的前提下完成低停顿的内存回收.
-	这是由于它能够极力避免全区域的垃圾收集:
-		G1启动后不需要请求更大的Java堆,
-		而G1将整个Java堆（包括新生代、老年代）划分为多个大小固定的独立区域(Region),
-		并且跟踪这些区域里的垃圾堆积程度，在后台维护一个优先列表，每次根据允许的收集时间，优先回收垃圾最多的区域。
-			
-			这里,每个区域大小相等，在1M~32M之间。
-			JVM最多支持2000个区域，可推算G1能支持的最大内存为2000*32M=62.5G。
-			区域(region)的大小在JVM初始化的时候决定，也可以用-XX:G1HeapReginSize设置。
-			在G1中没有物理上的Yong(Eden/Survivor)/Old Generation，它们是逻辑的，使用一些非连续的区域(Region)组成的。
-		新生代收集
-			当新生代占用达到一定比例的时候，开始触发收集。
-			经过Young GC后存活的对象被复制到一个或者多个区域空闲中，
-			这些被填充的区域将是新的新生代，当新生代对象的年龄已经达到阈值，被复制到老年代的区域中。
-			回收过程是STW，回收完成后根据Young GC的统计信息调整Eden和Survive的大小，有助于合理利用内存，提高回收效率。
-			回收的过程是多个回收线程并发收集。	
-		老年代收集
-			和CMS类似，G1收集器收集老年代对象会有短暂停顿。
-			1、标记阶段，Initial-Mark，这个阶段是STW，并且会触发一次普通Mintor GC。
-			2、Root Region Scanning，程序运行过程中会回收survive区（存活到老年代），这一过程在Young GC之前完成。
-			3、Concurrent Marking，整个堆中进行并发标记。
-			4、Remark再标记，短暂的STW，再标记阶段是用来收集并发标记阶段产生新的垃圾。
-			5、Copy/Clean up，多线程清除失活对象，
-			会有STW，G1将回收区域的存活对象拷贝到新区域，清除Remember Sets，并发清空回收区域并把它返回到空闲区域链表中。
-		Remember Sets：
-			G1收集器中，Region之间的对象引用以及其他收集器中的新生代和老年代之间的对象引用是使用Remember Sets来避免扫描全堆。
-	
-	
-	
-	
-	使用参数
-		-XX:+UnlockExperimentalVMOptions –XX:+UseG1GC 来启用 G1 回收器
-		-XX:MaxGCPauseMills=20,-XX:GCPauseIntervalMills=200 设置 G1 回收器的目标停顿时间
+关于吞吐量与暂停时间角度说明参考:
+	http://ifeve.com/useful-jvm-flags-part-6-throughput-collector/
 
-
-	主要来自:http://blog.csdn.net/future_ins/article/details/52166294
+主要来自:http://blog.csdn.net/future_ins/article/details/52166294
+	
 	其他参考:
 	http://www.importnew.com/13827.html
 	http://blog.csdn.net/weiyongxuan/article/details/46683823

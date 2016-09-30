@@ -1,0 +1,7 @@
+参数设置:
+-server -Xms1024m -Xmx1024m -Xmn348m -XX:+UseParallelOldGC -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=file/heap.bin
+	运行OOMMAT.java
+	导出Dump文件
+	eclipse安装mat插件,或者直接下载eclipse的mat安装
+	使用MAT打开HeapDump产生的文件,对Dump文件进行分析
+
