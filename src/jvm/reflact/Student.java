@@ -1,6 +1,6 @@
 package jvm.reflact;
 
-public class Strudent {
+public class Student {
 	private String name;
 
 	public String getName() {

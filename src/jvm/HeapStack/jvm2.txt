@@ -1,0 +1,55 @@
+图解JVM线程引擎与内存共享区域交互
+程序计算器内幕解密
+
+多线程Java应用程序中线程引擎与内存共享区域交互:
+	线程:
+		从OOP而言,
+			相当于一个对象,该对象中具有执行代码,同时也有要处理的数据,
+				数据包含Thread工作时候要访问的数据,
+			同时也包含现在的stack,在stack中包含了Thread本地的数据,也包含了拷贝的全局数据
+		从面向过程而言:
+			线程=代码+数据;
+	
+	Main Memory:全局共享内存空间;其中包含变量
+		JVM内存模型架构为:每个线程将与Main Memory进行交互
+		图例即其他深入理解参考:
+		http://developer.51cto.com/art/201307/402715.htm
+		http://www.infoq.com/cn/articles/java-memory-model-1
+		http://www.cnblogs.com/lewis0077/p/5143268.html?utm_source=tuicool&utm_medium=referral
+		(其和物理机CPU和内存交互相似,其实也就是JVM映射了物理交互的实现,关于这里参考后面详细说明) 
+		多线程中有多个task,每个线程有自己的内存区域,这里每个线程将与Main Memory进行交互是通过:
+		将共享内存中的变量copy到线程自己私有的工作内存工作,交给操作代码
+			这里将共享变量copy到线程私有内存操作是jvm实现的一个基本机制,设计原因是:
+				如果多线程直接对共享内存中变量操作,将容易发生状态不一致
+				物理级别的cpu操作内存的机制一样的,他们都遵循一个协议,具体的协议不同的JVM有不同的实现
+				其他深入学习,参考:
+				http://www.cnblogs.com/BangQ/p/4045954.html
+程序计算器引入:
+对于cpu而言,在一个时刻,只能工作于一个线程;而多线程应用将会不停的切换线程工作,
+线程工作一方面是状态的保持,另一方面是指令有序的工作;
+为了让线程正常工作,提出了程序计数器Program Counter Register
+
+	每个线程都有自己的线程计数器,这样当线程执行切换的时候可以在上次的基础上继续执行;
+	仅仅从一条线程线性执行的角度而言,
+		代码是一条一条的往下执行的,这个时候就是Program Counter Register;
+	JVM就是通过读取Program Counter Register中的值来决定该线程下一条需要执行的字节码指令,
+	进而选择语句,循环,异常处理等;
+
+---------------------------------------------------
+演示-Xss,-Xms,-Xmx三大性能调优参数
+	-Xms,-Xmx设置堆大小
+	-Xss每个线的堆栈大小设置
+	如:-verbose:gc -Xms5M -Xmx10M -Xss228k -XX:MaxDirectMemorySize=10M -XX:+PrintGCDetails
+	这里不同OS最小栈空间不同,Linux最小要大于228kb,Windows是108kb
+	-Xss的设置直接影响到堆栈调用的深度,当前程序线程并发量
+	See:HelloStackOverFlow.java
+	
+	-Xms,-Xmx几乎所有情况下设置值相同,
+	如果设置不一样时,如果heap不够用的时候,将发生内存堆抖动
+	See:HelloHeapOutOfMemory.java
+	调大该参数,一般有益于程序运行,当然也有弊端
+	如果cpu的cores更多,也应该调大该参数,这样每个core分配的对象参数也将增加
+	
+
+
+

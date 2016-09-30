@@ -1,5 +1,6 @@
 package jvm.HeapStack;
 
+//-verbose:gc -Xss228k -XX:+PrintGCDetails
 public class HeapStackDemo {
 
 	public static int count = 0;

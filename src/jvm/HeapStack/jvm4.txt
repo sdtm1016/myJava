@@ -1,0 +1,114 @@
+演示Minor GC
+	See:HeapOutOfMemory.java
+	jvm参数:-verbose:gc -Xms5M -Xmx10M -XX:+PrintGCDetails
+	注释 System.out.println("Instance: " + (++count));
+
+Minor GC日志解析:
+	前几行为新生代GC日志
+	jdk1.7显示:
+	[GC [PSYoungGen: 2560K->496K(3072K)] 2560K->1893K(6656K), 0.0057440 secs] 
+	[Times: user=0.02 sys=0.00, real=0.01 secs] 
+	jdk1.8显示:
+	[GC (Allocation Failure) [PSYoungGen: 2047K->505K(2560K)] 2047K->1549K(9728K), 0.0069986 secs] 
+	[Times: user=0.04 sys=0.00, real=0.01 secs] 
+	这里PSYoungGen指的是Minor GC的算法,
+	GC前新生代的存活对象的内存总和2560K,GC后内存为496K,整个新生代大小为3072K;
+	Minor GC前整个heap区的存活对象总和为2560K,Minor GC后为1893K,而整个heap大小为6656K;
+	整个GC消耗时间0.0057440 secs;
+	[Times: user=0.02 sys=0.00, real=0.01 secs]为用户时间消耗,系统时间消耗,实际消耗
+
+Full GC日志解析:
+	jdk1.7显示:
+	[Full GC [PSYoungGen: 512K->494K(3072K)] [ParOldGen: 3519K->3195K(6656K)] 4031K->3689K(9728K) 
+	[PSPermGen: 2444K->2443K(21504K)], 0.0391370 secs] [Times: user=0.11 sys=0.00, real=0.04 secs] 
+	jdk1.8显示:
+	[Full GC (Ergonomics) [PSYoungGen: 635K->0K(2048K)] [ParOldGen: 6752K->6830K(7168K)] 7387K->6830K(9216K), 
+	[Metaspace: 2526K->2526K(1056768K)], 0.0270893 secs] [Times: user=0.15 sys=0.00, real=0.03 secs] 
+	[Full GC (Allocation Failure) [PSYoungGen: 567K->567K(1536K)] [ParOldGen: 4070K->4058K(4096K)] 4638K->4626K(5632K), 
+	[Metaspace: 2491K->2491K(1056768K)], 0.0253072 secs] [Times: user=0.12 sys=0.00, real=0.03 secs] 
+	
+	发生了一次Full GC，整个JVM都停顿了xx秒.PSYoungGen意思同上
+	年老区GC前后以及整个年老区大小,heapGC前后以及真个Heap大小
+	然后,jdk1.8不同于jdk1.7的PSPermGen为Metaspace;空间比PSPermGen大很多,可理解为类相关信息
+		
+	GC信息的格式
+		[GC [<collector>: <starting occupancy1> -> <ending occupancy1>, <pause time1> secs] <starting occupancy3> -> <ending occupancy3>, <pause time3> secs]
+		<collector> GC为minor收集过程中使用的垃圾收集器起的内部名称.
+		<starting occupancy1> young generation 在进行垃圾收集前被对象使用的存储空间.
+		<ending occupancy1> young generation 在进行垃圾收集后被对象使用的存储空间
+		<pause time1> minor收集使应用暂停的时间长短(秒) 
+		<starting occupancy3> 整个堆(Heap Size)在进行垃圾收集前被对象使用的存储空间
+		<ending occupancy3> 整个堆(Heap Size)在进行垃圾收集后被对象使用的存储空间
+		<pause time3> 整个垃圾收集使应用暂停的时间长短(秒),包括major收集使应用暂停的时间(如果发生了major收集).
+
+	GC信息的选项
+		-XX:+PrintGCDetails 显示GC的详细信息
+		-XX:+PrintGCApplicationConcurrentTime 打印应用执行的时间
+		-XX:+PrintGCApplicationStoppedTime 打印应用被暂停的时间
+	参考:http://blog.csdn.net/kobejayandy/article/details/8496663
+
+这里关于JDK1.8的MetaSpace
+从Permanent到MetaSpace原因
+	优势和特点:
+		Metaspace是native namespace,使用c语言实现,也就是OS的内存空间
+		Metaspace内存空间能够在运行时根据需要动态调整
+	设置最大值:MaxMetaspaceSize,防止动态调整后对OS的内存空间耗尽
+	僵死的类及类加载器的垃圾回收将在元数据使用达到“MaxMetaspaceSize”参数的设定值时进行。
+	参考
+		https://my.oschina.net/benhaile/blog/214159
+		http://www.cnblogs.com/paddix/p/5309550.html
+
+内存逃逸分析
+	内存逃逸技术：分配内存对象的时候，这个内存对象不是在Heap区域。
+	
+	有两种方式，一种是在Java的栈区，还有就是本地区域。
+		一般比较鼓励使用内存逃逸技术，通过自己的运行机制来对逃逸对象进行释放。
+		在Stack分配和回收，有一个小小的弊端，就是对Stack会有一点压力。
+	https://yq.aliyun.com/articles/49201
+	http://blog.sina.com.cn/u/2628346427
+
+逃逸分析:
+当一个对象的指针被多个方法或线程引用时，我们称这个指针发生了逃逸。
+	而用来分析这种逃逸现象的方法，就称之为逃逸分析。
+	java对象是在堆里分配的，在Java栈帧中，只保存了对象的指针。
+	当对象不再使用后，需要依靠GC来遍历引用树并回收内存，
+	如果对象数量较多，将给GC带来较大压力，也间接影响了应用的性能。
+	减少临时对象在堆内分配的数量，无疑是最有效的优化方法。
+	案例:
+		假设在方法体内，声明了一个局部变量，且该变量在方法执行生命周期内未发生逃逸
+		（在方法体内，未将引用暴露给外面）。
+		按照JVM内存分配机制，首先会在堆里创建变量类的实例，然后将返回的对象指针压入调用栈，继续执行。这是优化前，JVM的处理方式。
+		
+		逃逸分析优化–栈上分配，优化原理：
+		JVM分析找到未逃逸的变量（在方法体内，未将引用暴露给外面），
+		将变量类的实例化内存直接在栈里分配(无需进入堆)，
+		分配完成后，继续在调用栈内执行，最后线程结束，栈空间被回收，局部变量也被回收。
+		这是优化后的处理方式，对比可以看出，主要区别在栈空间直接作为临时对象的存储介质。
+		从而减少了临时对象在堆内的分配数量。
+		
+		使用内存逃逸[分配的对象降低GC发生的次数和GC的负担，提升了GC回收的效率。
+	
+		-XX:+DoEscapeAnalysis 开启逃逸分析,
+		逃逸分析的目的是判断对象的作用域是否可能逃逸出函数体, 逃逸分析是栈上分配的技术基础，
+		对于非逃逸对象而言就是一个局部变量, 而对象未发生逃逸时, 虚拟机就有可能进行栈上分配, 不是堆上, 
+		栈上分配速度快，并且能避免垃圾回收带来的负面影响, 栈上分配是虚拟机提供的很好的对象分配优化策略
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
