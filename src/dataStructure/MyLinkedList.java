@@ -72,7 +72,7 @@ public class MyLinkedList<AnyType> implements Iterable<AnyType> {
 	 * after that position are slid one position higher.
 	 * 
 	 * @param p
-	 *            Node to add before.
+	 *            TreeNode to add before.
 	 * @param x
 	 *            any object.
 	 * @throws IndexOutOfBoundsException
@@ -118,7 +118,7 @@ public class MyLinkedList<AnyType> implements Iterable<AnyType> {
 	}
 
 	/**
-	 * Gets the Node at position idx, which must range from 0 to size( ) - 1.
+	 * Gets the TreeNode at position idx, which must range from 0 to size( ) - 1.
 	 * 
 	 * @param idx
 	 *            index to search at.
@@ -131,7 +131,7 @@ public class MyLinkedList<AnyType> implements Iterable<AnyType> {
 	}
 
 	/**
-	 * Gets the Node at position idx, which must range from lower to upper.
+	 * Gets the TreeNode at position idx, which must range from lower to upper.
 	 * 
 	 * @param idx
 	 *            index to search at.
@@ -175,10 +175,10 @@ public class MyLinkedList<AnyType> implements Iterable<AnyType> {
 	}
 
 	/**
-	 * Removes the object contained in Node p.
+	 * Removes the object contained in TreeNode p.
 	 * 
 	 * @param p
-	 *            the Node containing the object.
+	 *            the TreeNode containing the object.
 	 * @return the item was removed from the collection.
 	 */
 	private AnyType remove(Node<AnyType> p) {

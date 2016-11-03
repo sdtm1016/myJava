@@ -91,7 +91,7 @@
 下面是一些与二叉树有关的概念：
 
 二叉树搜索：对于所有节点，顺序是：
-	left children <= current node <= right children；
+	left children <= current myNode <= right children；
 平衡vs.非平衡：
 	它是一 棵空树或它的左右两个子树的高度差的绝对值不超过1，并且左右两个子树都是一棵平衡二叉树；
 满二叉树：

@@ -141,7 +141,7 @@ first与last的性质-->Queue:
 	LinkedList要移动指针遍历比较
 插入源码解析:
 	add(i,E)会通过checkPositionIndex检查有效性,判断是否是尾部add
-	不是则调用linkBefore(element, node(index))它是将两个节点作为参数(可以思考linkBefore的含义)
+	不是则调用linkBefore(element, myNode(index))它是将两个节点作为参数(可以思考linkBefore的含义)
 	linkBefore(e,succ)会先把要找到被插入节点的前一个节点:prev = succ.prev,然后对涉及到的三个节点分别修改或初始化:
 		1.new出要插入的节点:newNode(pred, e, succ),这里已经初始化了newNode三个属性
 		2.然后修改被插入节点succ的prev,指向newNode,即:succ.prev = newNode

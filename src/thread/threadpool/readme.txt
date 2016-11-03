@@ -1,6 +1,6 @@
 为什么要用线程池:
 	减少了创建和销毁线程的次数，每个工作线程都可以被重复利用，可执行多个任务
-	可以根据系统的承受能力，调整线程池中工作线线程的数目，防止因为因为消耗过多的内存，
+	可以根据系统的承受能力，调整线程池中工作线程的数目，防止因为消耗过多的内存，
 	而把服务器累趴下(每个线程需要大约1MB内存，线程开的越多，消耗的内存也就越大，最后死机) 
 
 Java里面线程池的顶级接口是Executor，
@@ -31,8 +31,6 @@ Java里面线程池的顶级接口是Executor，
     	此线程池不会对线程池大小做限制，线程池大小完全依赖于操作系统（或者说JVM）能够创建的最大线程大小。
     newScheduledThreadPool：创建一个大小无限的线程池。
     	此线程池支持定时以及周期性执行任务的需求。
-    newSingleThreadExecutor：创建一个单线程的线程池。
-    	此线程池支持定时以及周期性执行任务的需求。 
 
 那我个人感觉就是new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEPALIVE_TIME, TIME_UNIT, workQueue, rejectedExecutionHandler)；
 提供了更定制化的线程池制造方法。
@@ -55,11 +53,6 @@ java.util.concurrent.Executors类的API提供大量创建连接池的静态方�
 	4.延迟连接池；
 	5.单任务延迟连接池；
 	6.自定义线程池
-
-
-参考:
-http://www.cnblogs.com/www-35java-com/archive/2010/12/31/1923495.html
-
 
 
 
