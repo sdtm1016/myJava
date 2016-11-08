@@ -3,7 +3,7 @@ package math.demo;
 /**
  * 第1个人10，第2个比第1个人大2岁，依次递推，请用递归方式计算出第8个人多大？
  */
-public class A1 {
+public class RecursionSum {
 
 	public static void main(String[] args) {
 		System.out.println(computeAge(8));
