@@ -1,13 +1,13 @@
 package thread;
 
 /**
- *死锁
+ * 死锁
  */
 public class DeadThread implements Runnable {
 
-	public String username; 
+	public String username;
 	private Object lock1 = new Object();
-	private Object lock2=  new Object();
+	private Object lock2 = new Object();
 
 	public void setFlag(String username) {
 		this.username = username;
