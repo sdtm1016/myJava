@@ -33,10 +33,8 @@ public class Server {
 				// 根据socket启动对应线程单独处理接收消息
 				new Thread(new MessageResponseThread(sock)).start();
 			}
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
 }
