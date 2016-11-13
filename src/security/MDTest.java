@@ -6,9 +6,6 @@ import org.junit.Test;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
-
-/**
- */
 public class MDTest {
 	@Test
 	public void testMD() {
