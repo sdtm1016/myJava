@@ -38,18 +38,14 @@ public class ClassDemo1 {
 			Foo foo = (Foo) c1.newInstance();// 需要有无参的构造方法
 			foo.print();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 }
 
 class Foo {
 	void print() {
-
 	}
 }

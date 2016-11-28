@@ -1,22 +1,13 @@
-/**
- * 
- */
-/**
- * @author Noah
- *
- */
 package jvm.reflact.demo;
 
-import java.util.MissingFormatArgumentException;
-
-/*万事万物接对象
+/**
+ * 万事万物接对象
  * Class.forName("类的全称")
  * 不仅表示了，类的类类型，还代表了动态加载类
  * 区分编译、运行
  * 编译时加载类是静态加载类、运行时刻加载类是动态加载类
  * 4、基本的数据类型
  * 都存在类类型
- * 
  */
 public class ClassDemo {
 

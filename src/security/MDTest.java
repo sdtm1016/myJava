@@ -1,11 +1,14 @@
 package security;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
-import org.junit.Test;
-
 import java.security.MessageDigest;
 import java.util.Arrays;
 
+import org.junit.Test;
+
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+/**
+ * eclipse中导入Base64如果保存请在项目remove掉jre,然后重新导入jre即可
+ */
 public class MDTest {
 	@Test
 	public void testMD() {
