@@ -1,4 +1,4 @@
-package introspector;
+package jvm.introspector;
 
 public class Dog extends BaseDog {
 
