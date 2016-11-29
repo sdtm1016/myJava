@@ -10,6 +10,13 @@ package jvm.reflact;
 public class BigStudent extends Student {
 	private int degree;
 
+	public BigStudent() {
+	}
+
+	public BigStudent(int degree) {
+		this.degree = degree;
+	}
+
 	public int getDegree() {
 		return degree;
 	}

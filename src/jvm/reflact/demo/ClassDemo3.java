@@ -8,6 +8,5 @@ public class ClassDemo3 {
 		System.out.println("======================");
 		Integer n1 = 1;
 		ClassUtil.printClassMethodMessage(n1);
-
 	}
 }
