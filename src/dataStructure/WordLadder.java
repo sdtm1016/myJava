@@ -220,7 +220,7 @@ public class WordLadder {
 		}
 	}
 
-	// After the shortest path calculation has run, computes the List that
+	// After the shortest path calculation has run, computes the MyList that
 	// contains the sequence of word changes to get from first to second.
 	public static List<String> getChainFromPreviousMap(
 			Map<String, String> prev, String first, String second) {
@@ -234,7 +234,7 @@ public class WordLadder {
 	}
 
 	// Runs the shortest path calculation from the adjacency map, returning a
-	// List
+	// MyList
 	// that contains the sequence of words changes to get from first to second.
 	public static List<String> findChain(
 			Map<String, List<String>> adjacentWords, String first, String second) {
@@ -262,7 +262,7 @@ public class WordLadder {
 
 	// Runs the shortest path calculation from the original list of words,
 	// returning
-	// a List that contains the sequence of word changes to get from first to
+	// a MyList that contains the sequence of word changes to get from first to
 	// second. Since this calls computeAdjacentWords, it is recommended that the
 	// user instead call computeAdjacentWords once and then call other findChar
 	// for

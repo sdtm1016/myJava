@@ -1,7 +1,7 @@
 package dataStructure;
 /*package data;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.MyList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -111,7 +111,7 @@ public class RadixSort {
 	}
 
 	public static void main(String[] args) {
-		List<String> lst = new ArrayList<>();
+		MyList<String> lst = new ArrayList<>();
 		Random r = new Random();
 
 		final int LEN = 5;

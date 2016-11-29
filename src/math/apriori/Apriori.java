@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * 本程序用于频繁集的挖掘
  * 本项目实现了apriori算法，测试数据来自clementine的内置数据集
- * 首先用List<List<String>>类型的record将矩阵形式的数据读入内存；
+ * 首先用List<MyList<String>>类型的record将矩阵形式的数据读入内存；
  * <p>
  * 程序先求出k-1备选集，由备选集和数据库记录record求得满足支持度的k-1级集合，在满足支持度集合中求出满足自信度的集合，
  * 若满足置信度的集合为空，程序停止；

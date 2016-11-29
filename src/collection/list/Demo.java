@@ -22,7 +22,7 @@ public class Demo {
 		list.add(new Long(1));
 		// 通过debug查看元素的类型,或者遍历
 		System.out.println(list.size());
-		// 遍历集合 List.get(i)
+		// 遍历集合 MyList.get(i)
 		for (int i = 0; i < list.size(); i++) {
 			System.out.print(list.get(i) + ",");
 		}

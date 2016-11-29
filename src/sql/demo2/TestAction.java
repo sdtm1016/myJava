@@ -18,7 +18,7 @@ public class TestAction {
 		GoddessAction action = new GoddessAction();
 
 		// //查询query
-		// List<Goddess> result = action.query();
+		// MyList<Goddess> result = action.query();
 		//
 		// for (int i = 0; i < result.size(); i++) {
 		// System.out.println(result.get(i).getId()+

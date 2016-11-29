@@ -52,7 +52,7 @@ public class GoddessAction {
 	// public static void main(String[] args) throws Exception {
 	// GoddessDao g = new GoddessDao();
 	//
-	// List<Goddess> gs = g.query();
+	// MyList<Goddess> gs = g.query();
 	//
 	// for (Goddess goddess : gs) {
 	// System.out.println(goddess.getUser_name()+","+goddess.getAge());
@@ -96,13 +96,13 @@ public class GoddessAction {
 	// System.out.println(g2.toString());
 	//
 	// //优化方法调用1
-	// List<Goddess> result = g.query("小美","18712345678","xiaomei@qq.com");
+	// MyList<Goddess> result = g.query("小美","18712345678","xiaomei@qq.com");
 	// for (int i = 0; i < result.size(); i++) {
 	// System.out.println(result.get(i).toString());
 	// }
 	//
 	// //优化方法调用2使用List和Map
-	// List<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
+	// MyList<Map<String, Object>> params = new ArrayList<Map<String, Object>>();
 	// Map<String, Object> param = new HashMap<String,Object>();
 	// param.put("name", "user_name");
 	// param.put("rela", "like");
@@ -114,7 +114,7 @@ public class GoddessAction {
 	// param.put("rela", "=");
 	// param.put("value", "'18712345678'");
 	// params.add(param);
-	// List<Goddess> result = g.query(params);
+	// MyList<Goddess> result = g.query(params);
 	// for (int i = 0; i < result.size(); i++) {
 	// System.out.println(result.get(i).toString());
 	// }

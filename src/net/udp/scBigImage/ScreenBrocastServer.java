@@ -37,7 +37,7 @@ public class ScreenBrocastServer {
 				}
 				byte[] rowdata = captureScreen(robot, ract);
 				splitPack(rowdata, addr, port);
-				// List<DatagramPacket> packs = splitPack(rowdata, addr, port);
+				// MyList<DatagramPacket> packs = splitPack(rowdata, addr, port);
 
 			}
 		} catch (AWTException e) {
@@ -74,7 +74,7 @@ public class ScreenBrocastServer {
 
 		// pack的个数
 		int count = allLen % lenPerPack == 0 ? allLen / lenPerPack : allLen / lenPerPack + 1;
-		// List<DatagramPacket> packs = new ArrayList<DatagramPacket>();
+		// MyList<DatagramPacket> packs = new ArrayList<DatagramPacket>();
 		DatagramPacket pack = null;// pack包
 		byte[] newPack = null;// pack数组
 		int len = lenPerPack;// pack默认length

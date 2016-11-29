@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-//本程序用于读取矩阵型的记录数据，并转换为List<List<String>>格式数据
+//本程序用于读取矩阵型的记录数据，并转换为List<MyList<String>>格式数据
 public class TxtReader {
 
 	public List<List<String>> getRecord() {
