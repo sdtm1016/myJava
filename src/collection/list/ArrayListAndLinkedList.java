@@ -52,5 +52,4 @@ public class ArrayListAndLinkedList {
 		System.out.println(end - start + "<--LinkedList remove index in 250000");
 
 	}
-
 }
